@@ -17,15 +17,19 @@ OpenTelemetry observability (VictoriaMetrics + VictoriaLogs + Grafana + gastown-
 
 ## Prerequisites
 
-### Required repos (sibling directories expected at these exact paths)
+### Required repos (sibling directories expected at these paths)
 
 | Repo | Path | Role |
 |------|------|------|
-| [gastown](https://github.com/steveyegge/gastown) | `/Users/pa/dev/third-party/gastown` | `gt` CLI binary |
-| [gastown-otel](https://github.com/steveyegge/gastown-otel) | `/Users/pa/dev/third-party/gastown-otel` | docker-compose stack + gastown-trace |
+| [gastown](https://github.com/steveyegge/gastown) | `~/dev/third-party/gastown` | `gt` CLI binary |
+| [gastown-otel](https://github.com/steveyegge/gastown-otel) | `~/dev/third-party/gastown-otel` | docker-compose stack + gastown-trace |
 
-> **Note:** `run_full.py` uses hard-coded paths matching the setup above.
-> Adjust the `OTEL_DIR` constant at the top of the file if your layout differs.
+> **Note:** `run_full.py` uses the `GASTOWN_OTEL_DIR` environment variable.
+> Set it if your layout differs from `~/dev/third-party/gastown-otel`:
+> ```bash
+> export GASTOWN_OTEL_DIR=/path/to/your/gastown-otel
+> python3 run_full.py
+> ```
 
 ### Required tools
 
@@ -49,14 +53,14 @@ victoriametrics/victoria-logs:v1.45.0       # was: v1.45.0-victorialogs (does no
 grafana/grafana:12.3.3                       # was: 12.4.0
 ```
 
-Apply the fix before first run:
+Apply the fix before first run (replace `GASTOWN_OTEL_DIR` with your path if different):
 
 ```bash
 sed -i '' \
   's|victoria-metrics:v1.122.1|victoria-metrics:v1.136.0|' \
   's|victoria-logs:v1.45.0-victorialogs|victoria-logs:v1.45.0|' \
   's|grafana:12.4.0|grafana:12.3.3|' \
-  /Users/pa/dev/third-party/gastown-otel/docker-compose.yml
+  ${GASTOWN_OTEL_DIR:-~/dev/third-party/gastown-otel}/docker-compose.yml
 ```
 
 ### gastown-trace binary
@@ -64,7 +68,7 @@ sed -i '' \
 `gastown-trace` must be compiled before first run:
 
 ```bash
-cd /Users/pa/dev/third-party/gastown-otel/gastown-trace
+cd ${GASTOWN_OTEL_DIR:-~/dev/third-party/gastown-otel}/gastown-trace
 go build -o gastown-trace .
 ```
 

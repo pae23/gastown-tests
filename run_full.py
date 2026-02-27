@@ -42,7 +42,7 @@ REPORTS_DIR = SCRIPT_DIR / "reports" / TIMESTAMP
 TOWN_DIR    = Path.home() / "gt"   # global gastown town root
 PROMPT_FILE = SCRIPT_DIR / "PROMPT1.md"
 
-OTEL_DIR        = Path("/Users/pa/dev/third-party/gastown-otel")
+OTEL_DIR        = Path(os.environ.get("GASTOWN_OTEL_DIR", Path.home() / "dev" / "third-party" / "gastown-otel"))
 COMPOSE_FILE    = OTEL_DIR / "docker-compose.yml"
 COMPOSE_PROJECT = "gastown-otel"
 TRACE_BIN       = OTEL_DIR / "gastown-trace" / "gastown-trace"

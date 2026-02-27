@@ -4,9 +4,9 @@
 
 | Project | Path |
 |---------|------|
-| **Gastown** (CLI `gt`, agents, core) | `/Users/pa/dev/third-party/gastown` |
-| **Gastown OTEL** (observability infrastructure) | `/Users/pa/dev/third-party/gastown-otel` |
-| **gastown-trace** (OpenTelemetry visualization back/front) | `/Users/pa/dev/third-party/gastown-otel/gastown-trace` |
+| **Gastown** (CLI `gt`, agents, core) | `~/dev/third-party/gastown` |
+| **Gastown OTEL** (observability infrastructure) | `$GASTOWN_OTEL_DIR` (default: `~/dev/third-party/gastown-otel`) |
+| **gastown-trace** (OpenTelemetry visualization back/front) | `$GASTOWN_OTEL_DIR/gastown-trace` |
 
 ### Content of gastown-otel
 
@@ -26,30 +26,32 @@
 
 ## OpenTelemetry Commands
 
+> **Note:** Replace `$GASTOWN_OTEL_DIR` with your path if not set. Default: `~/dev/third-party/gastown-otel`
+
 ### Start the stack
 
 ```bash
-docker compose -f /Users/pa/dev/third-party/gastown-otel/docker-compose.yml up -d
+docker compose -f ${GASTOWN_OTEL_DIR:-~/dev/third-party/gastown-otel}/docker-compose.yml up -d
 ```
 
 ### Stop the stack
 
 ```bash
-docker compose -f /Users/pa/dev/third-party/gastown-otel/docker-compose.yml down
+docker compose -f ${GASTOWN_OTEL_DIR:-~/dev/third-party/gastown-otel}/docker-compose.yml down
 ```
 
 ### Complete OpenTelemetry data reset (⚠ erases all metrics/logs/traces)
 
 ```bash
-docker compose -f /Users/pa/dev/third-party/gastown-otel/docker-compose.yml down && \
+docker compose -f ${GASTOWN_OTEL_DIR:-~/dev/third-party/gastown-otel}/docker-compose.yml down && \
 docker volume rm gastown-otel_vm-data gastown-otel_vl-data gastown-otel_grafana-data 2>/dev/null || true && \
-docker compose -f /Users/pa/dev/third-party/gastown-otel/docker-compose.yml up -d
+docker compose -f ${GASTOWN_OTEL_DIR:-~/dev/third-party/gastown-otel}/docker-compose.yml up -d
 ```
 
 ### View stack logs
 
 ```bash
-docker compose -f /Users/pa/dev/third-party/gastown-otel/docker-compose.yml logs -f
+docker compose -f ${GASTOWN_OTEL_DIR:-~/dev/third-party/gastown-otel}/docker-compose.yml logs -f
 ```
 
 ---
