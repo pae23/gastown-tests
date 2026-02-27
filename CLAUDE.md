@@ -2,19 +2,19 @@
 
 ## Source Locations
 
-| Projet | Chemin |
-|--------|--------|
+| Project | Path |
+|---------|------|
 | **Gastown** (CLI `gt`, agents, core) | `/Users/pa/dev/third-party/gastown` |
-| **Gastown OTEL** (infra d'observabilité) | `/Users/pa/dev/third-party/gastown-otel` |
-| **gastown-trace** (back/front visualisation OpenTelemetry) | `/Users/pa/dev/third-party/gastown-otel/gastown-trace` |
+| **Gastown OTEL** (observability infrastructure) | `/Users/pa/dev/third-party/gastown-otel` |
+| **gastown-trace** (OpenTelemetry visualization back/front) | `/Users/pa/dev/third-party/gastown-otel/gastown-trace` |
 
-### Contenu de gastown-otel
+### Content of gastown-otel
 
-- `docker-compose.yml` — stack VictoriaMetrics + VictoriaLogs + Grafana
-- `gastown-trace/` — application back/front de visualisation des traces OpenTelemetry de gastown
-- `grafana/provisioning/` — datasources et dashboards Grafana pré-configurés
+- `docker-compose.yml` — VictoriaMetrics + VictoriaLogs + Grafana stack
+- `gastown-trace/` — back/front application for visualizing Gastown OpenTelemetry traces
+- `grafana/provisioning/` — pre-configured Grafana datasources and dashboards
 
-### Ports exposés (localhost uniquement)
+### Exposed Ports (localhost only)
 
 | Service | Port |
 |---------|------|
@@ -24,26 +24,30 @@
 
 ---
 
-## Commandes OpenTelemetry
+## OpenTelemetry Commands
 
-### Démarrer la stack
+### Start the stack
+
 ```bash
 docker compose -f /Users/pa/dev/third-party/gastown-otel/docker-compose.yml up -d
 ```
 
-### Arrêter la stack
+### Stop the stack
+
 ```bash
 docker compose -f /Users/pa/dev/third-party/gastown-otel/docker-compose.yml down
 ```
 
-### Reset complet des données OpenTelemetry (⚠ efface toutes les métriques/logs/traces)
+### Complete OpenTelemetry data reset (⚠ erases all metrics/logs/traces)
+
 ```bash
 docker compose -f /Users/pa/dev/third-party/gastown-otel/docker-compose.yml down && \
 docker volume rm gastown-otel_vm-data gastown-otel_vl-data gastown-otel_grafana-data 2>/dev/null || true && \
 docker compose -f /Users/pa/dev/third-party/gastown-otel/docker-compose.yml up -d
 ```
 
-### Voir les logs de la stack
+### View stack logs
+
 ```bash
 docker compose -f /Users/pa/dev/third-party/gastown-otel/docker-compose.yml logs -f
 ```
@@ -52,36 +56,37 @@ docker compose -f /Users/pa/dev/third-party/gastown-otel/docker-compose.yml logs
 
 ## Scripts
 
-### `run-full.sh` — cycle complet (recommandé)
+### `run-full.sh` — full cycle (recommended)
 
-Enchaîne toutes les phases en un seul lancement et écrit chaque étape dans `reports/TIMESTAMP/*.md` :
+Runs all phases in a single launch and writes each step to `reports/TIMESTAMP/*.md`:
 
-| Phase | Fichier généré | Description |
+| Phase | Generated file | Description |
 |-------|---------------|-------------|
-| 1 | `01-otel-reset.md` | Reset OTEL (docker volumes) |
-| 2 | `02-gastown-reset.md` | Reset instance Gastown |
-| 3 | `03-otel-start.md` | Démarrage stack OTEL + gastown-trace |
-| 4 | `04-gastown-start.md` | Init workspace + Mayor |
-| 5 | `05-test-launch.md` | Injection PROMPT1.md au Mayor |
-| 6 | `06-test-results.md` | Attente convoy + doctor + trail |
-| 7 | `07-otel-data.md` | Métriques + counts VictoriaLogs |
-| 8 | `08-recommendations.md` | Recommandations |
+| 1 | `01-otel-reset.md` | OTEL reset (docker volumes) |
+| 2 | `02-gastown-reset.md` | Gastown instance reset |
+| 3 | `03-otel-start.md` | OTEL stack + gastown-trace startup |
+| 4 | `04-gastown-start.md` | Workspace init + Mayor |
+| 5 | `05-test-launch.md` | PROMPT1.md injection to Mayor |
+| 6 | `06-test-results.md` | Convoy + doctor + trail wait |
+| 7 | `07-otel-data.md` | Metrics + VictoriaLogs counts |
+| 8 | `08-recommendations.md` | Recommendations |
 
 ```bash
 ./run-full.sh
-# Les rapports sont dans reports/latest/
-# gastown-trace reste actif jusqu'au Ctrl-C
+# Reports are in reports/latest/
+# gastown-trace stays active until Ctrl-C
 ```
 
-Timeout par défaut : 1h. Configurable :
+Default timeout: 1h. Configurable:
+
 ```bash
 CONVOY_TIMEOUT=7200 ./run-full.sh   # 2h
 ```
 
-### `run-test.sh` — injection seule (minimal)
+### `run-test.sh` — injection only (minimal)
 
-Crée (ou réutilise) le dossier `gt-test-instance/` dans ce projet, initialise Gastown,
-démarre le Mayor et injecte `PROMPT1.md` — sans reset ni OTEL.
+Creates (or reuses) the `gt-test-instance/` folder in this project, initializes Gastown,
+starts the Mayor and injects `PROMPT1.md` — without reset or OTEL.
 
 ```bash
 #!/usr/bin/env bash
@@ -92,11 +97,11 @@ INSTANCE_DIR="$SCRIPT_DIR/gt-test-instance"
 PROMPT_FILE="$SCRIPT_DIR/PROMPT1.md"
 
 if [[ ! -f "$PROMPT_FILE" ]]; then
-  echo "ERREUR : $PROMPT_FILE introuvable" >&2
+  echo "ERROR: $PROMPT_FILE not found" >&2
   exit 1
 fi
 
-# 1. Préparer le répertoire de l'instance
+# 1. Prepare instance directory
 mkdir -p "$INSTANCE_DIR"
 cd "$INSTANCE_DIR"
 
@@ -105,14 +110,14 @@ if [[ ! -d ".git" ]]; then
   git commit --allow-empty -m "init: gastown test instance"
 fi
 
-# 2. Initialiser la structure Gastown (idempotent avec --force)
+# 2. Initialize Gastown structure (idempotent with --force)
 gt init --force
 
-# 3. Démarrer le Mayor (no-op s'il tourne déjà)
+# 3. Start Mayor (no-op if already running)
 gt mayor start || true
 
-# 4. Attendre que la session Mayor soit prête
-echo "Attente du Mayor..."
+# 4. Wait for Mayor session to be ready
+echo "Waiting for Mayor..."
 for i in $(seq 1 30); do
   if gt mayor status 2>/dev/null | grep -q "running\|active"; then
     break
@@ -120,7 +125,7 @@ for i in $(seq 1 30); do
   sleep 2
 done
 
-# 5. Injecter PROMPT1.md au Mayor
+# 5. Inject PROMPT1.md to Mayor
 PROMPT_CONTENT="$(cat "$PROMPT_FILE")"
 gt mail send mayor/ \
   --subject "Test scenario: PROMPT1" \
@@ -128,10 +133,10 @@ gt mail send mayor/ \
   --type task \
   --priority 1
 
-echo "PROMPT1.md envoyé au Mayor dans $INSTANCE_DIR"
+echo "PROMPT1.md sent to Mayor in $INSTANCE_DIR"
 ```
 
-Sauvegarder ce script sous `run-test.sh` à la racine de ce projet, puis :
+Save this script as `run-test.sh` at the root of this project, then:
 
 ```bash
 chmod +x run-test.sh
